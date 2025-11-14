@@ -1,0 +1,78 @@
+"""
+Schemas de Pydantic para validación de datos de MANTENIMIENTO
+"""
+from typing import Optional, List
+from pydantic import BaseModel
+from datetime import date
+from decimal import Decimal
+
+
+class MantenimientoBase(BaseModel):
+    id_equipo: int
+    tipo_mantenimiento: Optional[str] = None
+    fecha_mantenimiento: Optional[date] = None
+    descripcion: Optional[str] = None
+    costo: Optional[Decimal] = None
+    tecnico_responsable: Optional[str] = None
+    observaciones: Optional[str] = None
+    id_usuario_registro: Optional[int] = None
+
+
+class MantenimientoCreate(MantenimientoBase):
+    pass
+
+
+class MantenimientoUpdate(BaseModel):
+    id_equipo: Optional[int] = None
+    tipo_mantenimiento: Optional[str] = None
+    fecha_mantenimiento: Optional[date] = None
+    descripcion: Optional[str] = None
+    costo: Optional[Decimal] = None
+    tecnico_responsable: Optional[str] = None
+    observaciones: Optional[str] = None
+    id_usuario_registro: Optional[int] = None
+
+
+class Mantenimiento(MantenimientoBase):
+    id_mantenimiento: int
+
+    class Config:
+        from_attributes = True
+
+
+class MantenimientoDetallado(Mantenimiento):
+    """Mantenimiento con relaciones incluidas"""
+    equipo: Optional["EquipoSimple"] = None
+    uso_repuestos: Optional[List["UsoRepuestoDetallado"]] = None
+
+    class Config:
+        from_attributes = True
+
+
+# Schemas simplificados para evitar importaciones circulares
+class EquipoSimple(BaseModel):
+    id_equipo: int
+    nombre_equipo: str
+    modelo: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class UsoRepuestoDetallado(BaseModel):
+    id_repuesto: int
+    cantidad_usada: int
+    precio_unitario: Optional[Decimal] = None
+    repuesto: Optional["RepuestoSimple"] = None
+
+    class Config:
+        from_attributes = True
+
+
+class RepuestoSimple(BaseModel):
+    id_repuesto: int
+    nombre_repuesto: str
+    descripcion: Optional[str] = None
+
+    class Config:
+        from_attributes = True
