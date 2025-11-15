@@ -9,8 +9,7 @@ from decimal import Decimal
 class UsoRepuestoBase(BaseModel):
     id_mantenimiento: int
     id_repuesto: int
-    cantidad_usada: int
-    precio_unitario: Optional[Decimal] = None
+    cantidad_usada: Optional[int] = None
 
 
 class UsoRepuestoCreate(UsoRepuestoBase):
@@ -19,7 +18,6 @@ class UsoRepuestoCreate(UsoRepuestoBase):
 
 class UsoRepuestoUpdate(BaseModel):
     cantidad_usada: Optional[int] = None
-    precio_unitario: Optional[Decimal] = None
 
 
 class UsoRepuesto(UsoRepuestoBase):
@@ -49,8 +47,8 @@ class MantenimientoSimple(BaseModel):
 
 class RepuestoSimple(BaseModel):
     id_repuesto: int
-    nombre_repuesto: str
-    stock_disponible: Optional[int] = None
+    nombre: str
+    stock: Optional[int] = None
 
     class Config:
         from_attributes = True

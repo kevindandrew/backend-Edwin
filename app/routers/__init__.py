@@ -21,6 +21,7 @@ from app.routers.venta import router as venta_router
 from app.routers.detalle_venta import router as detalle_venta_router
 from app.routers.estadisticas import router as estadisticas_router
 from app.routers.auth_router import router as auth_router
+from app.routers.auditoria import router as auditoria_router
 
 __all__ = [
     "rol_router", "usuario_router",
@@ -31,5 +32,5 @@ __all__ = [
     "mantenimiento_router", "repuesto_router", "uso_repuesto_router",
     "compra_adquisicion_router", "detalle_compra_router",
     "venta_router", "detalle_venta_router",
-    "estadisticas_router", "auth_router"
+    "estadisticas_router", "auth_router", "auditoria_router"
 ]

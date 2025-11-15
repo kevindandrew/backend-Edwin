@@ -10,12 +10,11 @@ from decimal import Decimal
 class MantenimientoBase(BaseModel):
     id_equipo: int
     tipo_mantenimiento: Optional[str] = None
-    fecha_mantenimiento: Optional[date] = None
-    descripcion: Optional[str] = None
-    costo: Optional[Decimal] = None
-    tecnico_responsable: Optional[str] = None
-    observaciones: Optional[str] = None
-    id_usuario_registro: Optional[int] = None
+    fecha_programada: Optional[date] = None
+    fecha_realizacion: Optional[date] = None
+    descripcion_trabajo: Optional[str] = None
+    costo_total: Optional[Decimal] = None
+    id_tecnico: Optional[int] = None
 
 
 class MantenimientoCreate(MantenimientoBase):
@@ -25,12 +24,11 @@ class MantenimientoCreate(MantenimientoBase):
 class MantenimientoUpdate(BaseModel):
     id_equipo: Optional[int] = None
     tipo_mantenimiento: Optional[str] = None
-    fecha_mantenimiento: Optional[date] = None
-    descripcion: Optional[str] = None
-    costo: Optional[Decimal] = None
-    tecnico_responsable: Optional[str] = None
-    observaciones: Optional[str] = None
-    id_usuario_registro: Optional[int] = None
+    fecha_programada: Optional[date] = None
+    fecha_realizacion: Optional[date] = None
+    descripcion_trabajo: Optional[str] = None
+    costo_total: Optional[Decimal] = None
+    id_tecnico: Optional[int] = None
 
 
 class Mantenimiento(MantenimientoBase):
@@ -61,8 +59,7 @@ class EquipoSimple(BaseModel):
 
 class UsoRepuestoDetallado(BaseModel):
     id_repuesto: int
-    cantidad_usada: int
-    precio_unitario: Optional[Decimal] = None
+    cantidad_usada: Optional[int] = None
     repuesto: Optional["RepuestoSimple"] = None
 
     class Config:
@@ -71,8 +68,7 @@ class UsoRepuestoDetallado(BaseModel):
 
 class RepuestoSimple(BaseModel):
     id_repuesto: int
-    nombre_repuesto: str
-    descripcion: Optional[str] = None
+    nombre: str
 
     class Config:
         from_attributes = True

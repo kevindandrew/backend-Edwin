@@ -12,11 +12,9 @@ class DetalleVenta(Base):
     id_detalle_venta = Column(Integer, primary_key=True, index=True)
     id_venta = Column(Integer, ForeignKey(
         "venta.id_venta", ondelete="CASCADE"), nullable=False)
-    id_equipo = Column(Integer, ForeignKey("equipo_biomedico.id_equipo"))
-    cantidad = Column(Integer, nullable=False)
-    precio_unitario = Column(Numeric(10, 2))
-    subtotal = Column(Numeric(10, 2))
-    descripcion = Column(Text)
+    id_equipo = Column(Integer, ForeignKey(
+        "equipo_biomedico.id_equipo"), nullable=False)
+    precio_venta = Column(Numeric(10, 2))
 
     # Relaciones
     venta = relationship("Venta", back_populates="detalles")

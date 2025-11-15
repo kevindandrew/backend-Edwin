@@ -14,8 +14,7 @@ class UsoRepuesto(Base):
         "mantenimiento.id_mantenimiento", ondelete="CASCADE"), primary_key=True)
     id_repuesto = Column(Integer, ForeignKey(
         "repuesto.id_repuesto", ondelete="CASCADE"), primary_key=True)
-    cantidad_usada = Column(Integer, nullable=False)
-    precio_unitario = Column(Numeric(10, 2))
+    cantidad_usada = Column(Integer)
 
     # Relaciones
     mantenimiento = relationship(

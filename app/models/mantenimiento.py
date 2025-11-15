@@ -12,16 +12,15 @@ class Mantenimiento(Base):
     id_mantenimiento = Column(Integer, primary_key=True, index=True)
     id_equipo = Column(Integer, ForeignKey(
         "equipo_biomedico.id_equipo"), nullable=False)
-    tipo_mantenimiento = Column(String(50))
-    fecha_mantenimiento = Column(Date)
-    descripcion = Column(Text)
-    costo = Column(Numeric(10, 2))
-    tecnico_responsable = Column(String(100))
-    observaciones = Column(Text)
-    id_usuario_registro = Column(Integer, ForeignKey("usuario.id_usuario"))
+    tipo_mantenimiento = Column(String(90))
+    fecha_programada = Column(Date)
+    fecha_realizacion = Column(Date)
+    descripcion_trabajo = Column(Text)
+    costo_total = Column(Numeric(10, 2))
+    id_tecnico = Column(Integer, ForeignKey("usuario.id_usuario"))
 
     # Relaciones
     equipo = relationship("EquipoBiomedico")
-    usuario_registro = relationship("Usuario")
+    tecnico = relationship("Usuario")
     uso_repuestos = relationship(
         "UsoRepuesto", back_populates="mantenimiento", cascade="all, delete-orphan")

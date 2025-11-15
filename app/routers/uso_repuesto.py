@@ -61,10 +61,10 @@ def registrar_uso_repuesto(
             )
 
         # Verificar stock disponible
-        if db_repuesto.stock_disponible < uso.cantidad_usada:
+        if db_repuesto.stock < uso.cantidad_usada:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Stock insuficiente. Disponible: {db_repuesto.stock_disponible}, Requerido: {uso.cantidad_usada}"
+                detail=f"Stock insuficiente. Disponible: {db_repuesto.stock}, Requerido: {uso.cantidad_usada}"
             )
 
         # Crear registro de uso
@@ -72,7 +72,7 @@ def registrar_uso_repuesto(
         db.add(db_uso)
 
         # Actualizar stock del repuesto
-        db_repuesto.stock_disponible -= uso.cantidad_usada
+        db_repuesto.stock -= uso.cantidad_usada
 
         db.commit()
         db.refresh(db_uso)
@@ -211,13 +211,13 @@ def actualizar_uso_repuesto(
 
             diferencia = uso_data['cantidad_usada'] - db_uso.cantidad_usada
 
-            if diferencia > 0 and db_repuesto.stock_disponible < diferencia:
+            if diferencia > 0 and db_repuesto.stock < diferencia:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"Stock insuficiente para el incremento solicitado"
                 )
 
-            db_repuesto.stock_disponible -= diferencia
+            db_repuesto.stock -= diferencia
 
         for key, value in uso_data.items():
             setattr(db_uso, key, value)
@@ -261,7 +261,7 @@ def eliminar_uso_repuesto(
             RepuestoModel.id_repuesto == repuesto_id
         ).first()
         if db_repuesto:
-            db_repuesto.stock_disponible += db_uso.cantidad_usada
+            db_repuesto.stock += db_uso.cantidad_usada
 
         db.delete(db_uso)
         db.commit()

@@ -8,14 +8,11 @@ from decimal import Decimal
 
 
 class VentaBase(BaseModel):
-    numero_factura: Optional[str] = None
+    id_cliente: int
+    id_usuario_vendedor: Optional[int] = None
     fecha_venta: Optional[date] = None
-    id_cliente: Optional[int] = None
-    total_venta: Optional[Decimal] = None
-    metodo_pago: Optional[str] = None
+    monto_total: Optional[Decimal] = None
     estado_venta: Optional[str] = None
-    observaciones: Optional[str] = None
-    id_usuario_registro: Optional[int] = None
 
 
 class VentaCreate(VentaBase):
@@ -23,14 +20,11 @@ class VentaCreate(VentaBase):
 
 
 class VentaUpdate(BaseModel):
-    numero_factura: Optional[str] = None
-    fecha_venta: Optional[date] = None
     id_cliente: Optional[int] = None
-    total_venta: Optional[Decimal] = None
-    metodo_pago: Optional[str] = None
+    id_usuario_vendedor: Optional[int] = None
+    fecha_venta: Optional[date] = None
+    monto_total: Optional[Decimal] = None
     estado_venta: Optional[str] = None
-    observaciones: Optional[str] = None
-    id_usuario_registro: Optional[int] = None
 
 
 class Venta(VentaBase):
@@ -52,8 +46,7 @@ class VentaDetallada(Venta):
 # Schemas simplificados
 class ClienteSimple(BaseModel):
     id_cliente: int
-    nombre_cliente: str
-    nit_ruc: Optional[str] = None
+    nombre_institucion: str
 
     class Config:
         from_attributes = True
@@ -61,20 +54,8 @@ class ClienteSimple(BaseModel):
 
 class DetalleVentaSimple(BaseModel):
     id_detalle_venta: int
-    cantidad: int
-    precio_unitario: Optional[Decimal] = None
-    subtotal: Optional[Decimal] = None
-    descripcion: Optional[str] = None
-    equipo: Optional["EquipoSimple"] = None
-
-    class Config:
-        from_attributes = True
-
-
-class EquipoSimple(BaseModel):
     id_equipo: int
-    nombre_equipo: str
-    modelo: Optional[str] = None
+    precio_venta: Optional[Decimal] = None
 
     class Config:
         from_attributes = True

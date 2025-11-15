@@ -38,16 +38,15 @@ def crear_detalle_venta(
                 detail=f"Venta con ID {detalle.id_venta} no encontrada"
             )
 
-        # Validar que el equipo existe si se proporciona
-        if detalle.id_equipo:
-            db_equipo = db.query(EquipoModel).filter(
-                EquipoModel.id_equipo == detalle.id_equipo
-            ).first()
-            if not db_equipo:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Equipo con ID {detalle.id_equipo} no encontrado"
-                )
+        # Validar que el equipo existe (OBLIGATORIO)
+        db_equipo = db.query(EquipoModel).filter(
+            EquipoModel.id_equipo == detalle.id_equipo
+        ).first()
+        if not db_equipo:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Equipo con ID {detalle.id_equipo} no encontrado"
+            )
 
         # Crear detalle
         db_detalle = DetalleVentaModel(**detalle.model_dump())
@@ -156,11 +155,16 @@ def actualizar_detalle_venta(
 
         detalle_data = detalle.model_dump(exclude_unset=True)
 
-        # Validar equipo si se está cambiando
-        if 'id_equipo' in detalle_data and detalle_data['id_equipo']:
-            if not db.query(EquipoModel).filter(EquipoModel.id_equipo == detalle_data['id_equipo']).first():
+        # Validar equipo si se está cambiando (OBLIGATORIO)
+        if 'id_equipo' in detalle_data:
+            db_equipo = db.query(EquipoModel).filter(
+                EquipoModel.id_equipo == detalle_data['id_equipo']
+            ).first()
+            if not db_equipo:
                 raise HTTPException(
-                    status_code=404, detail="Equipo no encontrado")
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Equipo con ID {detalle_data['id_equipo']} no encontrado"
+                )
 
         for key, value in detalle_data.items():
             setattr(db_detalle, key, value)

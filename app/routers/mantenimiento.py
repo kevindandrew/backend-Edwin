@@ -38,11 +38,11 @@ def crear_mantenimiento(
                 detail=f"Equipo con ID {mantenimiento.id_equipo} no encontrado"
             )
 
-        # Validar usuario si se proporciona
-        if mantenimiento.id_usuario_registro:
-            if not db.query(UsuarioModel).filter(UsuarioModel.id_usuario == mantenimiento.id_usuario_registro).first():
+        # Validar técnico si se proporciona
+        if mantenimiento.id_tecnico:
+            if not db.query(UsuarioModel).filter(UsuarioModel.id_usuario == mantenimiento.id_tecnico).first():
                 raise HTTPException(
-                    status_code=404, detail=f"Usuario no encontrado")
+                    status_code=404, detail=f"Técnico no encontrado")
 
         # Crear mantenimiento
         db_mantenimiento = MantenimientoModel(**mantenimiento.model_dump())

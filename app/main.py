@@ -17,7 +17,7 @@ from app.routers import (
     mantenimiento_router, repuesto_router, uso_repuesto_router,
     compra_adquisicion_router, detalle_compra_router,
     venta_router, detalle_venta_router,
-    estadisticas_router, auth_router
+    estadisticas_router, auth_router, auditoria_router
 )
 from app.database import engine, get_db
 from app.models import Base
@@ -68,6 +68,7 @@ app.include_router(detalle_compra_router)
 app.include_router(venta_router)
 app.include_router(detalle_venta_router)
 app.include_router(estadisticas_router)
+app.include_router(auditoria_router)
 
 
 @app.get("/")

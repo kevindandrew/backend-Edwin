@@ -8,11 +8,8 @@ from decimal import Decimal
 
 class DetalleVentaBase(BaseModel):
     id_venta: int
-    id_equipo: Optional[int] = None
-    cantidad: int
-    precio_unitario: Optional[Decimal] = None
-    subtotal: Optional[Decimal] = None
-    descripcion: Optional[str] = None
+    id_equipo: int
+    precio_venta: Optional[Decimal] = None
 
 
 class DetalleVentaCreate(DetalleVentaBase):
@@ -21,10 +18,7 @@ class DetalleVentaCreate(DetalleVentaBase):
 
 class DetalleVentaUpdate(BaseModel):
     id_equipo: Optional[int] = None
-    cantidad: Optional[int] = None
-    precio_unitario: Optional[Decimal] = None
-    subtotal: Optional[Decimal] = None
-    descripcion: Optional[str] = None
+    precio_venta: Optional[Decimal] = None
 
 
 class DetalleVenta(DetalleVentaBase):
@@ -46,7 +40,6 @@ class DetalleVentaConRelaciones(DetalleVenta):
 # Schemas simplificados
 class VentaSimple(BaseModel):
     id_venta: int
-    numero_factura: Optional[str] = None
     fecha_venta: Optional[str] = None
     estado_venta: Optional[str] = None
 

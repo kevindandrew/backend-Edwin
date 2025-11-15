@@ -8,13 +8,11 @@ from decimal import Decimal
 
 
 class CompraAdquisicionBase(BaseModel):
-    numero_factura: Optional[str] = None
-    fecha_compra: Optional[date] = None
-    proveedor: Optional[str] = None
-    total_compra: Optional[Decimal] = None
-    metodo_pago: Optional[str] = None
-    observaciones: Optional[str] = None
-    id_usuario_registro: Optional[int] = None
+    fecha_solicitud: Optional[date] = None
+    fecha_aprobacion: Optional[date] = None
+    estado_compra: Optional[str] = None
+    monto_total: Optional[Decimal] = None
+    id_usuario_admin: Optional[int] = None
 
 
 class CompraAdquisicionCreate(CompraAdquisicionBase):
@@ -22,13 +20,11 @@ class CompraAdquisicionCreate(CompraAdquisicionBase):
 
 
 class CompraAdquisicionUpdate(BaseModel):
-    numero_factura: Optional[str] = None
-    fecha_compra: Optional[date] = None
-    proveedor: Optional[str] = None
-    total_compra: Optional[Decimal] = None
-    metodo_pago: Optional[str] = None
-    observaciones: Optional[str] = None
-    id_usuario_registro: Optional[int] = None
+    fecha_solicitud: Optional[date] = None
+    fecha_aprobacion: Optional[date] = None
+    estado_compra: Optional[str] = None
+    monto_total: Optional[Decimal] = None
+    id_usuario_admin: Optional[int] = None
 
 
 class CompraAdquisicion(CompraAdquisicionBase):
@@ -48,21 +44,11 @@ class CompraAdquisicionDetallada(CompraAdquisicion):
 
 # Schemas simplificados
 class DetalleCompraSimple(BaseModel):
-    id_detalle_compra: int
-    cantidad: int
+    id_detalle: int
+    cantidad: Optional[int] = None
     precio_unitario: Optional[Decimal] = None
-    subtotal: Optional[Decimal] = None
-    descripcion: Optional[str] = None
-    equipo: Optional["EquipoSimple"] = None
-
-    class Config:
-        from_attributes = True
-
-
-class EquipoSimple(BaseModel):
-    id_equipo: int
-    nombre_equipo: str
-    modelo: Optional[str] = None
+    id_repuesto: Optional[int] = None
+    id_equipo: Optional[int] = None
 
     class Config:
         from_attributes = True

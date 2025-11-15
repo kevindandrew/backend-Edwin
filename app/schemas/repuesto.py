@@ -7,11 +7,10 @@ from decimal import Decimal
 
 
 class RepuestoBase(BaseModel):
-    nombre_repuesto: str
-    descripcion: Optional[str] = None
-    precio_unitario: Optional[Decimal] = None
-    stock_disponible: Optional[int] = 0
-    proveedor: Optional[str] = None
+    nombre: str
+    stock: Optional[int] = 0
+    stock_minimo: Optional[int] = 0
+    id_tecnologia: Optional[int] = None
 
 
 class RepuestoCreate(RepuestoBase):
@@ -19,11 +18,10 @@ class RepuestoCreate(RepuestoBase):
 
 
 class RepuestoUpdate(BaseModel):
-    nombre_repuesto: Optional[str] = None
-    descripcion: Optional[str] = None
-    precio_unitario: Optional[Decimal] = None
-    stock_disponible: Optional[int] = None
-    proveedor: Optional[str] = None
+    nombre: Optional[str] = None
+    stock: Optional[int] = None
+    stock_minimo: Optional[int] = None
+    id_tecnologia: Optional[int] = None
 
 
 class Repuesto(RepuestoBase):

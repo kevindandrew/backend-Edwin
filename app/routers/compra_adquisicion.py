@@ -24,25 +24,14 @@ def crear_compra(
     current_user=Depends(require_admin)
 ):
     """
-    Crear un nuevo registro de compra/adquisición
+    Crear un nuevo registro de compra/adquisición (Solo Administrador)
     """
     try:
-        # Validar número de factura único si se proporciona
-        if compra.numero_factura:
-            db_compra_existente = db.query(CompraModel).filter(
-                CompraModel.numero_factura == compra.numero_factura
-            ).first()
-            if db_compra_existente:
+        # Validar usuario administrador si se proporciona
+        if compra.id_usuario_admin:
+            if not db.query(UsuarioModel).filter(UsuarioModel.id_usuario == compra.id_usuario_admin).first():
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Ya existe una compra con ese número de factura"
-                )
-
-        # Validar usuario si se proporciona
-        if compra.id_usuario_registro:
-            if not db.query(UsuarioModel).filter(UsuarioModel.id_usuario == compra.id_usuario_registro).first():
-                raise HTTPException(
-                    status_code=404, detail="Usuario no encontrado")
+                    status_code=404, detail="Usuario administrador no encontrado")
 
         # Crear compra
         db_compra = CompraModel(**compra.model_dump())
@@ -130,17 +119,13 @@ def actualizar_compra(
 
         compra_data = compra.model_dump(exclude_unset=True)
 
-        # Validar número de factura único si se está cambiando
-        if 'numero_factura' in compra_data and compra_data['numero_factura']:
-            if compra_data['numero_factura'] != db_compra.numero_factura:
-                existing = db.query(CompraModel).filter(
-                    CompraModel.numero_factura == compra_data['numero_factura']
-                ).first()
-                if existing:
-                    raise HTTPException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Ya existe una compra con ese número de factura"
-                    )
+        # Validar usuario administrador si se está cambiando
+        if 'id_usuario_admin' in compra_data and compra_data['id_usuario_admin']:
+            if not db.query(UsuarioModel).filter(UsuarioModel.id_usuario == compra_data['id_usuario_admin']).first():
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Usuario administrador no encontrado"
+                )
 
         for key, value in compra_data.items():
             setattr(db_compra, key, value)
@@ -190,46 +175,18 @@ def eliminar_compra(
         )
 
 
-@router.get("/buscar/factura/{numero_factura}", response_model=CompraAdquisicionDetallada)
-def buscar_compra_por_factura(
-    numero_factura: str,
+@router.get("/estado/{estado}", response_model=List[CompraAdquisicion])
+def obtener_compras_por_estado(
+    estado: str,
     db: Session = Depends(get_db),
     current_user=Depends(require_admin)
 ):
     """
-    Buscar una compra por número de factura
-    """
-    try:
-        db_compra = db.query(CompraModel).filter(
-            CompraModel.numero_factura == numero_factura
-        ).first()
-        if db_compra is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Compra no encontrada"
-            )
-        return db_compra
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al buscar compra: {str(e)}"
-        )
-
-
-@router.get("/proveedor/{proveedor}", response_model=List[CompraAdquisicion])
-def obtener_compras_por_proveedor(
-    proveedor: str,
-    db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
-):
-    """
-    Obtener todas las compras de un proveedor específico
+    Obtener todas las compras por estado (Pendiente, Aprobada, Rechazada, etc.)
     """
     try:
         compras = db.query(CompraModel).filter(
-            CompraModel.proveedor == proveedor
+            CompraModel.estado_compra == estado
         ).all()
         return compras
     except Exception as e:

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.repuesto import Repuesto as RepuestoModel
+from app.models.tipo_tecnologia import TipoTecnologia as TecnologiaModel
 from app.schemas.repuesto import Repuesto, RepuestoCreate, RepuestoUpdate
 from app.auth import require_admin
 
@@ -26,6 +27,12 @@ def crear_repuesto(
     Crear un nuevo repuesto en el inventario (Solo Administrador)
     """
     try:
+        # Validar tecnología si se proporciona
+        if repuesto.id_tecnologia:
+            if not db.query(TecnologiaModel).filter(TecnologiaModel.id_tecnologia == repuesto.id_tecnologia).first():
+                raise HTTPException(
+                    status_code=404, detail=f"Tipo de tecnología no encontrado")
+
         db_repuesto = RepuestoModel(**repuesto.model_dump())
         db.add(db_repuesto)
         db.commit()
@@ -125,9 +132,13 @@ def actualizar_repuesto(
 
 
 @router.delete("/{repuesto_id}", status_code=status.HTTP_204_NO_CONTENT)
-def eliminar_repuesto(repuesto_id: int, db: Session = Depends(get_db)):
+def eliminar_repuesto(
+    repuesto_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_admin)
+):
     """
-    Eliminar un repuesto del inventario
+    Eliminar un repuesto del inventario (Solo Administrador)
     """
     try:
         db_repuesto = db.query(RepuestoModel).filter(
@@ -154,37 +165,16 @@ def eliminar_repuesto(repuesto_id: int, db: Session = Depends(get_db)):
 
 @router.get("/stock/bajo", response_model=List[Repuesto])
 def obtener_repuestos_stock_bajo(
-    limite: int = 10,
     db: Session = Depends(get_db),
     current_user=Depends(require_admin)
 ):
     """
-    Obtener repuestos con stock por debajo del límite especificado (Solo Administrador)
+    Obtener repuestos con stock por debajo del stock mínimo (Solo Administrador)
     """
     try:
+        # Repuestos donde stock <= stock_minimo
         repuestos = db.query(RepuestoModel).filter(
-            RepuestoModel.stock_disponible <= limite
-        ).all()
-        return repuestos
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener repuestos: {str(e)}"
-        )
-
-
-@router.get("/proveedor/{proveedor}", response_model=List[Repuesto])
-def obtener_repuestos_por_proveedor(
-    proveedor: str,
-    db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
-):
-    """
-    Obtener repuestos de un proveedor específico (Solo Administrador)
-    """
-    try:
-        repuestos = db.query(RepuestoModel).filter(
-            RepuestoModel.proveedor == proveedor
+            RepuestoModel.stock <= RepuestoModel.stock_minimo
         ).all()
         return repuestos
     except Exception as e:

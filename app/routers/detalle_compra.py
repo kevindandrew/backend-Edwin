@@ -8,6 +8,7 @@ from app.database import get_db
 from app.models.detalle_compra import DetalleCompra as DetalleCompraModel
 from app.models.compra_adquisicion import CompraAdquisicion as CompraModel
 from app.models.equipo_biomedico import EquipoBiomedico as EquipoModel
+from app.models.repuesto import Repuesto as RepuestoModel
 from app.schemas.detalle_compra import DetalleCompra, DetalleCompraCreate, DetalleCompraUpdate, DetalleCompraConRelaciones
 from app.auth import require_admin
 
@@ -25,7 +26,7 @@ def crear_detalle_compra(
     current_user=Depends(require_admin)
 ):
     """
-    Crear un nuevo detalle de compra (ítem en la compra)
+    Crear un nuevo detalle de compra - ítem en la compra (Solo Administrador)
     """
     try:
         # Validar que la compra existe
@@ -37,6 +38,24 @@ def crear_detalle_compra(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Compra con ID {detalle.id_compra} no encontrada"
             )
+
+        # Validar que al menos uno (repuesto o equipo) esté presente
+        if not detalle.id_repuesto and not detalle.id_equipo:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Debe especificar un repuesto o un equipo"
+            )
+
+        # Validar que el repuesto existe si se proporciona
+        if detalle.id_repuesto:
+            db_repuesto = db.query(RepuestoModel).filter(
+                RepuestoModel.id_repuesto == detalle.id_repuesto
+            ).first()
+            if not db_repuesto:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Repuesto con ID {detalle.id_repuesto} no encontrado"
+                )
 
         # Validar que el equipo existe si se proporciona
         if detalle.id_equipo:
@@ -96,7 +115,7 @@ def obtener_detalle_compra(
     """
     try:
         db_detalle = db.query(DetalleCompraModel).filter(
-            DetalleCompraModel.id_detalle_compra == detalle_id
+            DetalleCompraModel.id_detalle == detalle_id
         ).first()
         if db_detalle is None:
             raise HTTPException(
@@ -142,11 +161,11 @@ def actualizar_detalle_compra(
     current_user=Depends(require_admin)
 ):
     """
-    Actualizar un detalle de compra existente
+    Actualizar un detalle de compra existente (Solo Administrador)
     """
     try:
         db_detalle = db.query(DetalleCompraModel).filter(
-            DetalleCompraModel.id_detalle_compra == detalle_id
+            DetalleCompraModel.id_detalle == detalle_id
         ).first()
         if db_detalle is None:
             raise HTTPException(
@@ -185,11 +204,11 @@ def eliminar_detalle_compra(
     current_user=Depends(require_admin)
 ):
     """
-    Eliminar un detalle de compra
+    Eliminar un detalle de compra (Solo Administrador)
     """
     try:
         db_detalle = db.query(DetalleCompraModel).filter(
-            DetalleCompraModel.id_detalle_compra == detalle_id
+            DetalleCompraModel.id_detalle == detalle_id
         ).first()
         if db_detalle is None:
             raise HTTPException(

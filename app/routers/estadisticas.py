@@ -42,17 +42,18 @@ def obtener_estadisticas_dashboard(
         total_equipos = db.query(func.count(
             EquipoBiomedico.id_equipo)).scalar()
 
-        # Repuestos con stock bajo (menos de 10)
+        # Repuestos con stock bajo (stock menor que stock_minimo)
         repuestos_stock_bajo = db.query(func.count(Repuesto.id_repuesto)).filter(
-            Repuesto.stock_disponible < 10
+            Repuesto.stock < Repuesto.stock_minimo
         ).scalar()
 
-        # Total de mantenimientos este mes
+        # Total de mantenimientos este mes (usar fecha_realizacion)
         mes_actual = datetime.now().month
         año_actual = datetime.now().year
         mantenimientos_mes = db.query(func.count(Mantenimiento.id_mantenimiento)).filter(
-            extract('month', Mantenimiento.fecha_mantenimiento) == mes_actual,
-            extract('year', Mantenimiento.fecha_mantenimiento) == año_actual
+            Mantenimiento.fecha_realizacion.isnot(None),
+            extract('month', Mantenimiento.fecha_realizacion) == mes_actual,
+            extract('year', Mantenimiento.fecha_realizacion) == año_actual
         ).scalar()
 
         # Total de ventas este mes
@@ -61,16 +62,16 @@ def obtener_estadisticas_dashboard(
             extract('year', Venta.fecha_venta) == año_actual
         ).scalar()
 
-        # Ingresos del mes (sum de total_venta)
-        ingresos_mes = db.query(func.sum(Venta.total_venta)).filter(
+        # Ingresos del mes (sum de monto_total)
+        ingresos_mes = db.query(func.sum(Venta.monto_total)).filter(
             extract('month', Venta.fecha_venta) == mes_actual,
             extract('year', Venta.fecha_venta) == año_actual
         ).scalar() or 0
 
-        # Egresos del mes (sum de total_compra)
-        egresos_mes = db.query(func.sum(CompraAdquisicion.total_compra)).filter(
-            extract('month', CompraAdquisicion.fecha_compra) == mes_actual,
-            extract('year', CompraAdquisicion.fecha_compra) == año_actual
+        # Egresos del mes (sum de monto_total)
+        egresos_mes = db.query(func.sum(CompraAdquisicion.monto_total)).filter(
+            extract('month', CompraAdquisicion.fecha_solicitud) == mes_actual,
+            extract('year', CompraAdquisicion.fecha_solicitud) == año_actual
         ).scalar() or 0
 
         return {
@@ -137,7 +138,7 @@ def obtener_ventas_por_mes(
         resultado = db.query(
             extract('month', Venta.fecha_venta).label('mes'),
             func.count(Venta.id_venta).label('cantidad'),
-            func.sum(Venta.total_venta).label('total')
+            func.sum(Venta.monto_total).label('total')
         ).filter(
             extract('year', Venta.fecha_venta) == año
         ).group_by(extract('month', Venta.fecha_venta)).all()
@@ -169,12 +170,12 @@ def obtener_compras_por_mes(
     """
     try:
         resultado = db.query(
-            extract('month', CompraAdquisicion.fecha_compra).label('mes'),
+            extract('month', CompraAdquisicion.fecha_solicitud).label('mes'),
             func.count(CompraAdquisicion.id_compra).label('cantidad'),
-            func.sum(CompraAdquisicion.total_compra).label('total')
+            func.sum(CompraAdquisicion.monto_total).label('total')
         ).filter(
-            extract('year', CompraAdquisicion.fecha_compra) == año
-        ).group_by(extract('month', CompraAdquisicion.fecha_compra)).all()
+            extract('year', CompraAdquisicion.fecha_solicitud) == año
+        ).group_by(extract('month', CompraAdquisicion.fecha_solicitud)).all()
 
         return [
             {
@@ -213,7 +214,7 @@ def obtener_costos_mantenimiento_equipo(
             Mantenimiento.id_equipo == equipo_id
         ).scalar()
 
-        costo_total = db.query(func.sum(Mantenimiento.costo)).filter(
+        costo_total = db.query(func.sum(Mantenimiento.costo_total)).filter(
             Mantenimiento.id_equipo == equipo_id
         ).scalar() or 0
 
@@ -221,7 +222,7 @@ def obtener_costos_mantenimiento_equipo(
         por_tipo = db.query(
             Mantenimiento.tipo_mantenimiento,
             func.count(Mantenimiento.id_mantenimiento).label('cantidad'),
-            func.sum(Mantenimiento.costo).label('costo_total')
+            func.sum(Mantenimiento.costo_total).label('costo_total')
         ).filter(
             Mantenimiento.id_equipo == equipo_id
         ).group_by(Mantenimiento.tipo_mantenimiento).all()
@@ -253,7 +254,8 @@ def obtener_costos_mantenimiento_equipo(
 def obtener_repuestos_mas_usados(
     limit: int = Query(
         default=10, description="Cantidad de repuestos a retornar"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(require_admin)
 ):
     """
     Obtener los repuestos más utilizados en mantenimientos
@@ -263,14 +265,14 @@ def obtener_repuestos_mas_usados(
 
         resultado = db.query(
             Repuesto.id_repuesto,
-            Repuesto.nombre_repuesto,
+            Repuesto.nombre,
             func.sum(UsoRepuesto.cantidad_usada).label('total_usado'),
             func.count(UsoRepuesto.id_mantenimiento).label('veces_usado')
         ).join(
             UsoRepuesto, UsoRepuesto.id_repuesto == Repuesto.id_repuesto
         ).group_by(
             Repuesto.id_repuesto,
-            Repuesto.nombre_repuesto
+            Repuesto.nombre
         ).order_by(
             func.sum(UsoRepuesto.cantidad_usada).desc()
         ).limit(limit).all()
@@ -306,16 +308,16 @@ def obtener_top_clientes(
 
         resultado = db.query(
             Cliente.id_cliente,
-            Cliente.nombre_cliente,
+            Cliente.nombre_institucion,
             func.count(Venta.id_venta).label('total_ventas'),
-            func.sum(Venta.total_venta).label('monto_total')
+            func.sum(Venta.monto_total).label('monto_total')
         ).join(
             Venta, Venta.id_cliente == Cliente.id_cliente
         ).group_by(
             Cliente.id_cliente,
-            Cliente.nombre_cliente
+            Cliente.nombre_institucion
         ).order_by(
-            func.sum(Venta.total_venta).desc()
+            func.sum(Venta.monto_total).desc()
         ).limit(limit).all()
 
         return [
@@ -348,29 +350,22 @@ def obtener_resumen_venta(
         if not venta:
             raise HTTPException(status_code=404, detail="Venta no encontrada")
 
-        # Calcular totales de los detalles
+        # Calcular totales de los detalles (solo precio_venta)
         detalles = db.query(
             DetalleVenta.id_detalle_venta,
-            DetalleVenta.cantidad,
-            DetalleVenta.precio_unitario,
-            DetalleVenta.subtotal,
-            DetalleVenta.descripcion
+            DetalleVenta.precio_venta
         ).filter(DetalleVenta.id_venta == venta_id).all()
 
-        subtotal_calculado = sum(float(d.subtotal or 0) for d in detalles)
+        subtotal_calculado = sum(float(d.precio_venta or 0) for d in detalles)
         total_items = len(detalles)
-        total_cantidad = sum(int(d.cantidad) for d in detalles)
 
         return {
             "id_venta": venta.id_venta,
-            "numero_factura": venta.numero_factura,
             "fecha_venta": str(venta.fecha_venta),
-            "total_venta": float(venta.total_venta or 0),
-            "metodo_pago": venta.metodo_pago,
+            "monto_total": float(venta.monto_total or 0),
             "estado_venta": venta.estado_venta,
             "resumen": {
                 "total_items": total_items,
-                "total_cantidad": total_cantidad,
                 "subtotal": subtotal_calculado
             }
         }
@@ -399,26 +394,24 @@ def obtener_resumen_compra(
         if not compra:
             raise HTTPException(status_code=404, detail="Compra no encontrada")
 
-        # Calcular totales de los detalles
+        # Calcular totales de los detalles (cantidad y precio_unitario)
         detalles = db.query(
-            DetalleCompra.id_detalle_compra,
+            DetalleCompra.id_detalle,
             DetalleCompra.cantidad,
-            DetalleCompra.precio_unitario,
-            DetalleCompra.subtotal,
-            DetalleCompra.descripcion
+            DetalleCompra.precio_unitario
         ).filter(DetalleCompra.id_compra == compra_id).all()
 
-        subtotal_calculado = sum(float(d.subtotal or 0) for d in detalles)
+        subtotal_calculado = sum(
+            float((d.cantidad or 0) * (d.precio_unitario or 0)) for d in detalles)
         total_items = len(detalles)
-        total_cantidad = sum(int(d.cantidad) for d in detalles)
+        total_cantidad = sum(int(d.cantidad or 0) for d in detalles)
 
         return {
             "id_compra": compra.id_compra,
-            "numero_factura": compra.numero_factura,
-            "fecha_compra": str(compra.fecha_compra),
-            "proveedor": compra.proveedor,
-            "total_compra": float(compra.total_compra or 0),
-            "metodo_pago": compra.metodo_pago,
+            "fecha_solicitud": str(compra.fecha_solicitud),
+            "fecha_aprobacion": str(compra.fecha_aprobacion) if compra.fecha_aprobacion else None,
+            "estado_compra": compra.estado_compra,
+            "monto_total": float(compra.monto_total or 0),
             "resumen": {
                 "total_items": total_items,
                 "total_cantidad": total_cantidad,
