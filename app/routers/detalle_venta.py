@@ -9,7 +9,7 @@ from app.models.detalle_venta import DetalleVenta as DetalleVentaModel
 from app.models.venta import Venta as VentaModel
 from app.models.equipo_biomedico import EquipoBiomedico as EquipoModel
 from app.schemas.detalle_venta import DetalleVenta, DetalleVentaCreate, DetalleVentaUpdate, DetalleVentaConRelaciones
-from app.auth import require_admin
+from app.auth import require_admin_or_gestor, require_any_authenticated
 
 router = APIRouter(
     prefix="/detalles-venta",
@@ -22,7 +22,7 @@ router = APIRouter(
 def crear_detalle_venta(
     detalle: DetalleVentaCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Crear un nuevo detalle de venta (ítem en la venta)
@@ -69,7 +69,7 @@ def obtener_detalles_venta(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Obtener lista de detalles de venta con relaciones
@@ -88,7 +88,7 @@ def obtener_detalles_venta(
 def obtener_detalles_por_venta(
     venta_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener todos los detalles de una venta específica
@@ -109,7 +109,7 @@ def obtener_detalles_por_venta(
 def obtener_detalle_venta(
     detalle_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener un detalle de venta específico por ID
@@ -138,7 +138,7 @@ def actualizar_detalle_venta(
     detalle_id: int,
     detalle: DetalleVentaUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Actualizar un detalle de venta existente
@@ -186,7 +186,7 @@ def actualizar_detalle_venta(
 def eliminar_detalle_venta(
     detalle_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Eliminar un detalle de venta

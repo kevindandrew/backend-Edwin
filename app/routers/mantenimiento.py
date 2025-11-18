@@ -9,7 +9,7 @@ from app.models.mantenimiento import Mantenimiento as MantenimientoModel
 from app.models.equipo_biomedico import EquipoBiomedico as EquipoModel
 from app.models.usuario import Usuario as UsuarioModel
 from app.schemas.mantenimiento import Mantenimiento, MantenimientoCreate, MantenimientoUpdate, MantenimientoDetallado
-from app.auth import require_admin
+from app.auth import require_admin_or_tecnico, require_any_authenticated
 
 router = APIRouter(
     prefix="/mantenimientos",
@@ -22,7 +22,7 @@ router = APIRouter(
 def crear_mantenimiento(
     mantenimiento: MantenimientoCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_tecnico)
 ):
     """
     Crear un nuevo registro de mantenimiento (Solo Administrador)
@@ -65,10 +65,10 @@ def obtener_mantenimientos(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener lista de mantenimientos (Solo Administrador)
+    Obtener lista de mantenimientos
     """
     try:
         mantenimientos = db.query(MantenimientoModel).offset(
@@ -85,7 +85,7 @@ def obtener_mantenimientos(
 def obtener_mantenimiento(
     mantenimiento_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener un mantenimiento específico por ID con detalles (Solo Administrador)
@@ -114,7 +114,7 @@ def actualizar_mantenimiento(
     mantenimiento_id: int,
     mantenimiento: MantenimientoUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_tecnico)
 ):
     """
     Actualizar un mantenimiento existente (Solo Administrador)
@@ -154,9 +154,13 @@ def actualizar_mantenimiento(
 
 
 @router.delete("/{mantenimiento_id}", status_code=status.HTTP_204_NO_CONTENT)
-def eliminar_mantenimiento(mantenimiento_id: int, db: Session = Depends(get_db)):
+def eliminar_mantenimiento(
+    mantenimiento_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_admin_or_tecnico)
+):
     """
-    Eliminar un mantenimiento (también eliminará los registros de uso de repuestos en cascada)
+    Eliminar un mantenimiento (Administrador o Técnico de Mantenimiento)
     """
     try:
         db_mantenimiento = db.query(MantenimientoModel).filter(
@@ -185,7 +189,7 @@ def eliminar_mantenimiento(mantenimiento_id: int, db: Session = Depends(get_db))
 def obtener_mantenimientos_por_equipo(
     equipo_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener todos los mantenimientos de un equipo específico (Solo Administrador)
@@ -206,7 +210,7 @@ def obtener_mantenimientos_por_equipo(
 def obtener_mantenimientos_por_tipo(
     tipo: str,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener todos los mantenimientos por tipo (preventivo, correctivo, calibración, etc.) (Solo Administrador)

@@ -13,7 +13,7 @@ from app.models.nivel_riesgo import NivelRiesgo as NivelRiesgoModel
 from app.models.tipo_tecnologia import TipoTecnologia as TecnologiaModel
 from app.models.usuario import Usuario as UsuarioModel
 from app.schemas.equipo_biomedico import EquipoBiomedico, EquipoBiomedicoCreate, EquipoBiomedicoUpdate, EquipoBiomedicoDetallado
-from app.auth import require_admin
+from app.auth import require_admin_or_gestor, require_any_authenticated
 
 router = APIRouter(
     prefix="/equipos-biomedicos",
@@ -26,7 +26,7 @@ router = APIRouter(
 def crear_equipo_biomedico(
     equipo: EquipoBiomedicoCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Crear un nuevo equipo biomédico (Solo Administrador)
@@ -95,7 +95,7 @@ def obtener_equipos_biomedicos(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Obtener lista de equipos biomédicos (Solo Administrador)
@@ -114,7 +114,7 @@ def obtener_equipos_biomedicos(
 def buscar_equipo_por_serie(
     numero_serie: str,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Buscar un equipo biomédico por número de serie (Solo Administrador)
@@ -142,7 +142,7 @@ def buscar_equipo_por_serie(
 def obtener_equipos_por_ubicacion(
     ubicacion_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener todos los equipos de una ubicación específica (Solo Administrador)
@@ -163,7 +163,7 @@ def obtener_equipos_por_ubicacion(
 def obtener_equipos_por_estado(
     estado: str,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener todos los equipos por estado (operativo, mantenimiento, fuera de servicio, etc.) (Solo Administrador)
@@ -184,7 +184,7 @@ def obtener_equipos_por_estado(
 def obtener_equipo_biomedico(
     equipo_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener un equipo biomédico específico por ID con todas sus relaciones (Solo Administrador)
@@ -213,7 +213,7 @@ def actualizar_equipo_biomedico(
     equipo_id: int,
     equipo: EquipoBiomedicoUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Actualizar un equipo biomédico existente (Solo Administrador)
@@ -268,7 +268,7 @@ def actualizar_equipo_biomedico(
 def eliminar_equipo_biomedico(
     equipo_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Eliminar un equipo biomédico (también eliminará sus datos técnicos en cascada) (Solo Administrador)

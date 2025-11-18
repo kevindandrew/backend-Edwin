@@ -10,7 +10,7 @@ from app.models.compra_adquisicion import CompraAdquisicion as CompraModel
 from app.models.equipo_biomedico import EquipoBiomedico as EquipoModel
 from app.models.repuesto import Repuesto as RepuestoModel
 from app.schemas.detalle_compra import DetalleCompra, DetalleCompraCreate, DetalleCompraUpdate, DetalleCompraConRelaciones
-from app.auth import require_admin
+from app.auth import require_admin_or_compras, require_any_authenticated
 
 router = APIRouter(
     prefix="/detalles-compra",
@@ -23,7 +23,7 @@ router = APIRouter(
 def crear_detalle_compra(
     detalle: DetalleCompraCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_compras)
 ):
     """
     Crear un nuevo detalle de compra - ítem en la compra (Solo Administrador)
@@ -89,7 +89,7 @@ def obtener_detalles_compra(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_compras)
 ):
     """
     Obtener lista de detalles de compra con relaciones
@@ -108,7 +108,7 @@ def obtener_detalles_compra(
 def obtener_detalle_compra(
     detalle_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener un detalle de compra específico por ID
@@ -136,7 +136,7 @@ def obtener_detalle_compra(
 def obtener_detalles_por_compra(
     compra_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener todos los detalles de una compra específica (Solo Administrador)
@@ -158,7 +158,7 @@ def actualizar_detalle_compra(
     detalle_id: int,
     detalle: DetalleCompraUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_compras)
 ):
     """
     Actualizar un detalle de compra existente (Solo Administrador)
@@ -201,7 +201,7 @@ def actualizar_detalle_compra(
 def eliminar_detalle_compra(
     detalle_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_compras)
 ):
     """
     Eliminar un detalle de compra (Solo Administrador)

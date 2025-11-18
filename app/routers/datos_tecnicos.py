@@ -8,7 +8,7 @@ from app.database import get_db
 from app.models.datos_tecnicos import DatosTecnicos as DatosTecnicosModel
 from app.models.equipo_biomedico import EquipoBiomedico as EquipoModel
 from app.schemas.datos_tecnicos import DatosTecnicos, DatosTecnicosCreate, DatosTecnicosUpdate, DatosTecnicosConEquipo
-from app.auth import require_admin
+from app.auth import require_admin_or_gestor, require_any_authenticated
 
 router = APIRouter(
     prefix="/datos-tecnicos",
@@ -21,7 +21,7 @@ router = APIRouter(
 def crear_datos_tecnicos(
     datos: DatosTecnicosCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Crear datos técnicos para un equipo biomédico (relación 1:1) (Solo Administrador)
@@ -68,7 +68,7 @@ def obtener_datos_tecnicos(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Obtener lista de datos técnicos con información del equipo (Solo Administrador)
@@ -87,7 +87,7 @@ def obtener_datos_tecnicos(
 def obtener_dato_tecnico(
     datos_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener datos técnicos específicos por ID (Solo Administrador)
@@ -115,7 +115,7 @@ def obtener_dato_tecnico(
 def obtener_datos_tecnicos_por_equipo(
     equipo_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener los datos técnicos de un equipo específico (Solo Administrador)
@@ -144,7 +144,7 @@ def actualizar_datos_tecnicos(
     datos_id: int,
     datos: DatosTecnicosUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Actualizar datos técnicos existentes (Solo Administrador)
@@ -180,7 +180,7 @@ def actualizar_datos_tecnicos(
 def eliminar_datos_tecnicos(
     datos_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Eliminar datos técnicos (Solo Administrador)

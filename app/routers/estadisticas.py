@@ -14,7 +14,7 @@ from app.models.mantenimiento import Mantenimiento
 from app.models.repuesto import Repuesto
 from app.models.detalle_venta import DetalleVenta
 from app.models.detalle_compra import DetalleCompra
-from app.auth import require_admin
+from app.auth import require_any_authenticated
 
 router = APIRouter(
     prefix="/estadisticas",
@@ -26,7 +26,7 @@ router = APIRouter(
 @router.get("/dashboard")
 def obtener_estadisticas_dashboard(
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener estadísticas generales para el dashboard principal
@@ -97,7 +97,7 @@ def obtener_estadisticas_dashboard(
 @router.get("/equipos/por-categoria")
 def obtener_equipos_por_categoria(
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener la cantidad de equipos agrupados por categoría
@@ -129,7 +129,7 @@ def obtener_ventas_por_mes(
     año: int = Query(default=datetime.now().year,
                      description="Año a consultar"),
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener total de ventas agrupado por mes para un año específico
@@ -163,7 +163,7 @@ def obtener_compras_por_mes(
     año: int = Query(default=datetime.now().year,
                      description="Año a consultar"),
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener total de compras agrupado por mes para un año específico
@@ -196,7 +196,7 @@ def obtener_compras_por_mes(
 def obtener_costos_mantenimiento_equipo(
     equipo_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener el costo total de mantenimientos para un equipo específico
@@ -255,7 +255,7 @@ def obtener_repuestos_mas_usados(
     limit: int = Query(
         default=10, description="Cantidad de repuestos a retornar"),
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener los repuestos más utilizados en mantenimientos
@@ -298,7 +298,7 @@ def obtener_top_clientes(
     limit: int = Query(
         default=10, description="Cantidad de clientes a retornar"),
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener los clientes con mayor volumen de compras (Solo Administrador)
@@ -340,7 +340,7 @@ def obtener_top_clientes(
 def obtener_resumen_venta(
     venta_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener resumen completo de una venta con cálculos automáticos
@@ -382,7 +382,7 @@ def obtener_resumen_venta(
 def obtener_resumen_compra(
     compra_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener resumen completo de una compra con cálculos automáticos

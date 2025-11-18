@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.cliente import Cliente as ClienteModel
 from app.schemas.cliente import Cliente, ClienteCreate, ClienteUpdate, ClienteConUbicaciones
-from app.auth import require_admin
+from app.auth import require_admin_or_gestor, require_any_authenticated
 
 router = APIRouter(
     prefix="/clientes",
@@ -20,10 +20,10 @@ router = APIRouter(
 def crear_cliente(
     cliente: ClienteCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Crear un nuevo cliente (Solo Administrador)
+    Crear un nuevo cliente (Administrador o Gestor Biomédico)
     """
     try:
         # Verificar si ya existe un cliente con ese NIT/RUC
@@ -58,10 +58,10 @@ def obtener_clientes(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener lista de clientes (Solo Administrador)
+    Obtener lista de clientes
     """
     try:
         clientes = db.query(ClienteModel).offset(skip).limit(limit).all()
@@ -77,10 +77,10 @@ def obtener_clientes(
 def obtener_cliente(
     cliente_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener un cliente específico por ID con sus ubicaciones (Solo Administrador)
+    Obtener un cliente específico por ID con sus ubicaciones
     """
     try:
         db_cliente = db.query(ClienteModel).filter(
@@ -106,10 +106,10 @@ def actualizar_cliente(
     cliente_id: int,
     cliente: ClienteUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Actualizar un cliente existente (Solo Administrador)
+    Actualizar un cliente existente (Administrador o Gestor Biomédico)
     """
     try:
         db_cliente = db.query(ClienteModel).filter(
@@ -153,10 +153,10 @@ def actualizar_cliente(
 def eliminar_cliente(
     cliente_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Eliminar un cliente (Solo Administrador)
+    Eliminar un cliente (Administrador o Gestor Biomédico)
     """
     try:
         db_cliente = db.query(ClienteModel).filter(
@@ -185,10 +185,10 @@ def eliminar_cliente(
 def buscar_cliente_por_nit(
     nit_ruc: str,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Buscar un cliente por NIT/RUC (Solo Administrador)
+    Buscar un cliente por NIT/RUC
     """
     try:
         db_cliente = db.query(ClienteModel).filter(

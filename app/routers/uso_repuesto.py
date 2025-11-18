@@ -10,7 +10,7 @@ from app.models.uso_repuesto import UsoRepuesto as UsoRepuestoModel
 from app.models.mantenimiento import Mantenimiento as MantenimientoModel
 from app.models.repuesto import Repuesto as RepuestoModel
 from app.schemas.uso_repuesto import UsoRepuesto, UsoRepuestoCreate, UsoRepuestoUpdate, UsoRepuestoConDetalles
-from app.auth import require_admin
+from app.auth import require_admin_or_tecnico, require_any_authenticated
 
 router = APIRouter(
     prefix="/uso-repuestos",
@@ -23,7 +23,7 @@ router = APIRouter(
 def registrar_uso_repuesto(
     uso: UsoRepuestoCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_tecnico)
 ):
     """
     Registrar el uso de un repuesto en un mantenimiento
@@ -92,7 +92,7 @@ def obtener_uso_repuestos(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_tecnico)
 ):
     """
     Obtener lista de uso de repuestos con detalles
@@ -111,7 +111,7 @@ def obtener_uso_repuestos(
 def obtener_repuestos_por_mantenimiento(
     mantenimiento_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener todos los repuestos usados en un mantenimiento específico
@@ -132,7 +132,7 @@ def obtener_repuestos_por_mantenimiento(
 def obtener_mantenimientos_por_repuesto(
     repuesto_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener todos los mantenimientos donde se usó un repuesto específico
@@ -154,7 +154,7 @@ def obtener_uso_repuesto_especifico(
     mantenimiento_id: int,
     repuesto_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_tecnico)
 ):
     """
     Obtener el registro de uso específico de un repuesto en un mantenimiento
@@ -185,7 +185,7 @@ def actualizar_uso_repuesto(
     repuesto_id: int,
     uso: UsoRepuestoUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_tecnico)
 ):
     """
     Actualizar un registro de uso de repuesto
@@ -240,7 +240,7 @@ def eliminar_uso_repuesto(
     mantenimiento_id: int,
     repuesto_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_tecnico)
 ):
     """
     Eliminar un registro de uso de repuesto (devuelve el stock al inventario)

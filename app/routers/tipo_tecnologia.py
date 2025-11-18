@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.tipo_tecnologia import TipoTecnologia as TipoTecnologiaModel
 from app.schemas.tipo_tecnologia import TipoTecnologia, TipoTecnologiaCreate, TipoTecnologiaUpdate
-from app.auth import require_admin
+from app.auth import require_admin_or_gestor, require_any_authenticated
 
 router = APIRouter(
     prefix="/tipos-tecnologia",
@@ -20,10 +20,10 @@ router = APIRouter(
 def crear_tipo_tecnologia(
     tipo: TipoTecnologiaCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Crear un nuevo tipo de tecnología (Solo Administrador)
+    Crear un nuevo tipo de tecnología (Administrador o Gestor Biomédico)
     """
     try:
         db_tipo = TipoTecnologiaModel(**tipo.model_dump())
@@ -44,10 +44,10 @@ def obtener_tipos_tecnologia(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener lista de tipos de tecnología (Solo Administrador)
+    Obtener lista de tipos de tecnología
     """
     try:
         tipos = db.query(TipoTecnologiaModel).offset(skip).limit(limit).all()
@@ -63,10 +63,10 @@ def obtener_tipos_tecnologia(
 def obtener_tipo_tecnologia(
     tipo_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener un tipo de tecnología específico por ID (Solo Administrador)
+    Obtener un tipo de tecnología específico por ID
     """
     try:
         db_tipo = db.query(TipoTecnologiaModel).filter(
@@ -92,10 +92,10 @@ def actualizar_tipo_tecnologia(
     tipo_id: int,
     tipo: TipoTecnologiaUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Actualizar un tipo de tecnología existente (Solo Administrador)
+    Actualizar un tipo de tecnología existente (Administrador o Gestor Biomédico)
     """
     try:
         db_tipo = db.query(TipoTecnologiaModel).filter(
@@ -128,10 +128,10 @@ def actualizar_tipo_tecnologia(
 def eliminar_tipo_tecnologia(
     tipo_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Eliminar un tipo de tecnología (Solo Administrador)
+    Eliminar un tipo de tecnología (Administrador o Gestor Biomédico)
     """
     try:
         db_tipo = db.query(TipoTecnologiaModel).filter(

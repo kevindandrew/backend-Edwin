@@ -8,7 +8,7 @@ from app.database import get_db
 from app.models.repuesto import Repuesto as RepuestoModel
 from app.models.tipo_tecnologia import TipoTecnologia as TecnologiaModel
 from app.schemas.repuesto import Repuesto, RepuestoCreate, RepuestoUpdate
-from app.auth import require_admin
+from app.auth import require_admin_or_tecnico, require_any_authenticated
 
 router = APIRouter(
     prefix="/repuestos",
@@ -21,7 +21,7 @@ router = APIRouter(
 def crear_repuesto(
     repuesto: RepuestoCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_tecnico)
 ):
     """
     Crear un nuevo repuesto en el inventario (Solo Administrador)
@@ -51,7 +51,7 @@ def obtener_repuestos(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_tecnico)
 ):
     """
     Obtener lista de repuestos (Solo Administrador)
@@ -70,7 +70,7 @@ def obtener_repuestos(
 def obtener_repuesto(
     repuesto_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener un repuesto específico por ID (Solo Administrador)
@@ -99,7 +99,7 @@ def actualizar_repuesto(
     repuesto_id: int,
     repuesto: RepuestoUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_tecnico)
 ):
     """
     Actualizar un repuesto existente (Solo Administrador)
@@ -135,7 +135,7 @@ def actualizar_repuesto(
 def eliminar_repuesto(
     repuesto_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_tecnico)
 ):
     """
     Eliminar un repuesto del inventario (Solo Administrador)
@@ -166,7 +166,7 @@ def eliminar_repuesto(
 @router.get("/stock/bajo", response_model=List[Repuesto])
 def obtener_repuestos_stock_bajo(
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_tecnico)
 ):
     """
     Obtener repuestos con stock por debajo del stock mínimo (Solo Administrador)

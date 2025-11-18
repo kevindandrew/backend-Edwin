@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.categoria_equipo import CategoriaEquipo as CategoriaEquipoModel
 from app.schemas.categoria_equipo import CategoriaEquipo, CategoriaEquipoCreate, CategoriaEquipoUpdate
-from app.auth import require_admin
+from app.auth import require_admin_or_gestor, require_any_authenticated
 
 router = APIRouter(
     prefix="/categorias-equipo",
@@ -20,10 +20,10 @@ router = APIRouter(
 def crear_categoria_equipo(
     categoria: CategoriaEquipoCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Crear una nueva categoría de equipo (Solo Administrador)
+    Crear una nueva categoría de equipo (Administrador o Gestor Biomédico)
     """
     try:
         db_categoria = CategoriaEquipoModel(**categoria.model_dump())
@@ -44,10 +44,10 @@ def obtener_categorias_equipo(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener lista de categorías de equipo (Solo Administrador)
+    Obtener lista de categorías de equipo
     """
     try:
         categorias = db.query(CategoriaEquipoModel).offset(
@@ -64,10 +64,10 @@ def obtener_categorias_equipo(
 def obtener_categoria_equipo(
     categoria_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener una categoría de equipo específica por ID (Solo Administrador)
+    Obtener una categoría de equipo específica por ID
     """
     try:
         db_categoria = db.query(CategoriaEquipoModel).filter(
@@ -93,10 +93,10 @@ def actualizar_categoria_equipo(
     categoria_id: int,
     categoria: CategoriaEquipoUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Actualizar una categoría de equipo existente (Solo Administrador)
+    Actualizar una categoría de equipo existente (Administrador o Gestor Biomédico)
     """
     try:
         db_categoria = db.query(CategoriaEquipoModel).filter(
@@ -129,10 +129,10 @@ def actualizar_categoria_equipo(
 def eliminar_categoria_equipo(
     categoria_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Eliminar una categoría de equipo (Solo Administrador)
+    Eliminar una categoría de equipo (Administrador o Gestor Biomédico)
     """
     try:
         db_categoria = db.query(CategoriaEquipoModel).filter(

@@ -8,7 +8,7 @@ from app.database import get_db
 from app.models.compra_adquisicion import CompraAdquisicion as CompraModel
 from app.models.usuario import Usuario as UsuarioModel
 from app.schemas.compra_adquisicion import CompraAdquisicion, CompraAdquisicionCreate, CompraAdquisicionUpdate, CompraAdquisicionDetallada
-from app.auth import require_admin
+from app.auth import require_admin_or_compras, require_any_authenticated
 
 router = APIRouter(
     prefix="/compras",
@@ -21,7 +21,7 @@ router = APIRouter(
 def crear_compra(
     compra: CompraAdquisicionCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_compras)
 ):
     """
     Crear un nuevo registro de compra/adquisición (Solo Administrador)
@@ -54,7 +54,7 @@ def obtener_compras(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_compras)
 ):
     """
     Obtener lista de compras/adquisiciones
@@ -73,7 +73,7 @@ def obtener_compras(
 def obtener_compra(
     compra_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener una compra específica por ID con todos sus detalles
@@ -102,7 +102,7 @@ def actualizar_compra(
     compra_id: int,
     compra: CompraAdquisicionUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_compras)
 ):
     """
     Actualizar una compra/adquisición existente
@@ -147,7 +147,7 @@ def actualizar_compra(
 def eliminar_compra(
     compra_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_compras)
 ):
     """
     Eliminar una compra (también eliminará sus detalles en cascada)
@@ -179,7 +179,7 @@ def eliminar_compra(
 def obtener_compras_por_estado(
     estado: str,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener todas las compras por estado (Pendiente, Aprobada, Rechazada, etc.)

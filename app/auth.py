@@ -111,7 +111,11 @@ class RoleChecker:
         )
 
 
-# Funciones helper para verificar roles específicos
+# ============================================================
+# FUNCIONES DE AUTORIZACIÓN POR ROL
+# ============================================================
+
+# Rol 1: ADMINISTRADOR - Acceso total
 def require_admin(
     current_user: Usuario = Depends(get_current_active_user),
     db: Session = Depends(get_db)
@@ -121,18 +125,109 @@ def require_admin(
     return checker(current_user, db)
 
 
+# Rol 2: TÉCNICO DE MANTENIMIENTO - Mantenimientos, repuestos, equipos
+def require_tecnico(
+    current_user: Usuario = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+) -> Usuario:
+    """Requiere rol de Técnico de Mantenimiento"""
+    checker = RoleChecker([
+        "Técnico de Mantenimiento",
+        "TÉCNICO DE MANTENIMIENTO",
+        "tecnico de mantenimiento",
+        "Tecnico de Mantenimiento",
+        "Tecnico De Mantenimiento"  # Forma exacta en BD
+    ])
+    return checker(current_user, db)
+
+
+# Rol 3: RESPONSABLE DE COMPRAS - Compras, proveedores, repuestos
+def require_compras(
+    current_user: Usuario = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+) -> Usuario:
+    """Requiere rol de Responsable de Compras"""
+    checker = RoleChecker([
+        "Responsable de Compras",
+        "RESPONSABLE DE COMPRAS",
+        "responsable de compras"
+    ])
+    return checker(current_user, db)
+
+
+# Rol 4: GESTOR BIOMÉDICO - Equipos, clientes, ventas, inventario
+def require_gestor(
+    current_user: Usuario = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+) -> Usuario:
+    """Requiere rol de Gestor Biomédico"""
+    checker = RoleChecker([
+        "Gestor Biomédico",
+        "GESTOR BIOMÉDICO",
+        "gestor biomedico",
+        "Gestor Biomedico"  # Forma exacta en BD (sin tilde)
+    ])
+    return checker(current_user, db)
+
+
+# Rol 5: USUARIO CONSULTA - Solo lectura
+def require_consulta(
+    current_user: Usuario = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+) -> Usuario:
+    """Requiere rol de Usuario Consulta (solo lectura)"""
+    checker = RoleChecker([
+        "Usuario Consulta",
+        "USUARIO CONSULTA",
+        "usuario consulta"
+    ])
+    return checker(current_user, db)
+
+
+# ============================================================
+# COMBINACIONES DE ROLES (para endpoints que aceptan varios roles)
+# ============================================================
+
 def require_admin_or_tecnico(
     current_user: Usuario = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ) -> Usuario:
-    """Requiere rol de Administrador o Técnico"""
-    checker = RoleChecker(["Administrador", "administrador",
-                          "ADMINISTRADOR", "Técnico", "tecnico", "TECNICO"])
+    """Administrador o Técnico de Mantenimiento"""
+    checker = RoleChecker([
+        "Administrador", "ADMINISTRADOR",
+        "Técnico de Mantenimiento", "TÉCNICO DE MANTENIMIENTO",
+        "Tecnico De Mantenimiento"  # Forma exacta en BD
+    ])
+    return checker(current_user, db)
+
+
+def require_admin_or_compras(
+    current_user: Usuario = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+) -> Usuario:
+    """Administrador o Responsable de Compras"""
+    checker = RoleChecker([
+        "Administrador", "ADMINISTRADOR",
+        "Responsable de Compras", "RESPONSABLE DE COMPRAS"
+    ])
+    return checker(current_user, db)
+
+
+def require_admin_or_gestor(
+    current_user: Usuario = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+) -> Usuario:
+    """Administrador o Gestor Biomédico"""
+    checker = RoleChecker([
+        "Administrador", "ADMINISTRADOR",
+        "Gestor Biomédico", "GESTOR BIOMÉDICO",
+        "Gestor Biomedico"  # Forma exacta en BD (sin tilde)
+    ])
     return checker(current_user, db)
 
 
 def require_any_authenticated(
     current_user: Usuario = Depends(get_current_active_user)
 ) -> Usuario:
-    """Requiere cualquier usuario autenticado"""
+    """Cualquier usuario autenticado (todos los roles)"""
     return current_user

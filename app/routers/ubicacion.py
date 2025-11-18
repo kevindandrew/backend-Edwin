@@ -8,7 +8,7 @@ from app.database import get_db
 from app.models.ubicacion import Ubicacion as UbicacionModel
 from app.models.cliente import Cliente as ClienteModel
 from app.schemas.ubicacion import Ubicacion, UbicacionCreate, UbicacionUpdate, UbicacionConCliente
-from app.auth import require_admin
+from app.auth import require_admin_or_gestor, require_any_authenticated
 
 router = APIRouter(
     prefix="/ubicaciones",
@@ -21,10 +21,10 @@ router = APIRouter(
 def crear_ubicacion(
     ubicacion: UbicacionCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Crear una nueva ubicación (Solo Administrador)
+    Crear una nueva ubicación (Administrador o Gestor Biomédico)
     """
     try:
         # Verificar que el cliente existe si se proporciona id_cliente
@@ -59,10 +59,10 @@ def obtener_ubicaciones(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener lista de ubicaciones con información del cliente (Solo Administrador)
+    Obtener lista de ubicaciones con información del cliente
     """
     try:
         ubicaciones = db.query(UbicacionModel).offset(skip).limit(limit).all()
@@ -78,10 +78,10 @@ def obtener_ubicaciones(
 def obtener_ubicacion(
     ubicacion_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener una ubicación específica por ID con información del cliente (Solo Administrador)
+    Obtener una ubicación específica por ID con información del cliente
     """
     try:
         db_ubicacion = db.query(UbicacionModel).filter(
@@ -107,10 +107,10 @@ def actualizar_ubicacion(
     ubicacion_id: int,
     ubicacion: UbicacionUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Actualizar una ubicación existente (Solo Administrador)
+    Actualizar una ubicación existente (Administrador o Gestor Biomédico)
     """
     try:
         db_ubicacion = db.query(UbicacionModel).filter(
@@ -154,10 +154,10 @@ def actualizar_ubicacion(
 def eliminar_ubicacion(
     ubicacion_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Eliminar una ubicación (Solo Administrador)
+    Eliminar una ubicación (Administrador o Gestor Biomédico)
     """
     try:
         db_ubicacion = db.query(UbicacionModel).filter(
@@ -186,10 +186,10 @@ def eliminar_ubicacion(
 def obtener_ubicaciones_por_cliente(
     cliente_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener todas las ubicaciones de un cliente específico (Solo Administrador)
+    Obtener todas las ubicaciones de un cliente específico
     """
     try:
         # Verificar que el cliente existe
@@ -218,10 +218,10 @@ def obtener_ubicaciones_por_cliente(
 @router.get("/almacen/sin-cliente", response_model=List[Ubicacion])
 def obtener_ubicaciones_almacen(
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener todas las ubicaciones que no tienen cliente asignado (almacén) (Solo Administrador)
+    Obtener todas las ubicaciones que no tienen cliente asignado (almacén)
     """
     try:
         ubicaciones = db.query(UbicacionModel).filter(

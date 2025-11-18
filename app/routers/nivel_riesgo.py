@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.nivel_riesgo import NivelRiesgo as NivelRiesgoModel
 from app.schemas.nivel_riesgo import NivelRiesgo, NivelRiesgoCreate, NivelRiesgoUpdate
-from app.auth import require_admin
+from app.auth import require_admin_or_gestor, require_any_authenticated
 
 router = APIRouter(
     prefix="/niveles-riesgo",
@@ -20,10 +20,10 @@ router = APIRouter(
 def crear_nivel_riesgo(
     nivel: NivelRiesgoCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Crear un nuevo nivel de riesgo (Solo Administrador)
+    Crear un nuevo nivel de riesgo (Administrador o Gestor Biomédico)
     """
     try:
         db_nivel = NivelRiesgoModel(**nivel.model_dump())
@@ -44,10 +44,10 @@ def obtener_niveles_riesgo(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener lista de niveles de riesgo (Solo Administrador)
+    Obtener lista de niveles de riesgo
     """
     try:
         niveles = db.query(NivelRiesgoModel).offset(skip).limit(limit).all()
@@ -63,10 +63,10 @@ def obtener_niveles_riesgo(
 def obtener_nivel_riesgo(
     nivel_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener un nivel de riesgo específico por ID (Solo Administrador)
+    Obtener un nivel de riesgo específico por ID
     """
     try:
         db_nivel = db.query(NivelRiesgoModel).filter(
@@ -92,10 +92,10 @@ def actualizar_nivel_riesgo(
     nivel_id: int,
     nivel: NivelRiesgoUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Actualizar un nivel de riesgo existente (Solo Administrador)
+    Actualizar un nivel de riesgo existente (Administrador o Gestor Biomédico)
     """
     try:
         db_nivel = db.query(NivelRiesgoModel).filter(
@@ -128,10 +128,10 @@ def actualizar_nivel_riesgo(
 def eliminar_nivel_riesgo(
     nivel_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Eliminar un nivel de riesgo (Solo Administrador)
+    Eliminar un nivel de riesgo (Administrador o Gestor Biomédico)
     """
     try:
         db_nivel = db.query(NivelRiesgoModel).filter(

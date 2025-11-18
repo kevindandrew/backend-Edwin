@@ -9,7 +9,7 @@ from app.models.venta import Venta as VentaModel
 from app.models.cliente import Cliente as ClienteModel
 from app.models.usuario import Usuario as UsuarioModel
 from app.schemas.venta import Venta, VentaCreate, VentaUpdate, VentaDetallada
-from app.auth import require_admin
+from app.auth import require_admin_or_gestor, require_any_authenticated
 
 router = APIRouter(
     prefix="/ventas",
@@ -22,7 +22,7 @@ router = APIRouter(
 def crear_venta(
     venta: VentaCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Crear un nuevo registro de venta (Solo Administrador)
@@ -60,7 +60,7 @@ def obtener_ventas(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Obtener lista de ventas
@@ -79,7 +79,7 @@ def obtener_ventas(
 def obtener_ventas_por_cliente(
     cliente_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener todas las ventas de un cliente específico (Solo Administrador)
@@ -100,7 +100,7 @@ def obtener_ventas_por_cliente(
 def obtener_ventas_por_estado(
     estado: str,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener todas las ventas por estado (pendiente, completada, cancelada, etc.) (Solo Administrador)
@@ -121,7 +121,7 @@ def obtener_ventas_por_estado(
 def obtener_venta(
     venta_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
     Obtener una venta específica por ID con todos sus detalles
@@ -150,7 +150,7 @@ def actualizar_venta(
     venta_id: int,
     venta: VentaUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Actualizar una venta existente
@@ -199,7 +199,7 @@ def actualizar_venta(
 def eliminar_venta(
     venta_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
     Eliminar una venta (también eliminará sus detalles en cascada)

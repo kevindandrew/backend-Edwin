@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.fabricante import Fabricante as FabricanteModel
 from app.schemas.fabricante import Fabricante, FabricanteCreate, FabricanteUpdate
-from app.auth import require_admin
+from app.auth import require_admin_or_gestor, require_any_authenticated
 
 router = APIRouter(
     prefix="/fabricantes",
@@ -20,10 +20,10 @@ router = APIRouter(
 def crear_fabricante(
     fabricante: FabricanteCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Crear un nuevo fabricante (Solo Administrador)
+    Crear un nuevo fabricante (Administrador o Gestor Biomédico)
     """
     try:
         db_fabricante = FabricanteModel(**fabricante.model_dump())
@@ -44,10 +44,10 @@ def obtener_fabricantes(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener lista de fabricantes (Solo Administrador)
+    Obtener lista de fabricantes
     """
     try:
         fabricantes = db.query(FabricanteModel).offset(skip).limit(limit).all()
@@ -63,10 +63,10 @@ def obtener_fabricantes(
 def obtener_fabricante(
     fabricante_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_any_authenticated)
 ):
     """
-    Obtener un fabricante específico por ID (Solo Administrador)
+    Obtener un fabricante específico por ID
     """
     try:
         db_fabricante = db.query(FabricanteModel).filter(
@@ -92,10 +92,10 @@ def actualizar_fabricante(
     fabricante_id: int,
     fabricante: FabricanteUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Actualizar un fabricante existente (Solo Administrador)
+    Actualizar un fabricante existente (Administrador o Gestor Biomédico)
     """
     try:
         db_fabricante = db.query(FabricanteModel).filter(
@@ -128,10 +128,10 @@ def actualizar_fabricante(
 def eliminar_fabricante(
     fabricante_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin)
+    current_user=Depends(require_admin_or_gestor)
 ):
     """
-    Eliminar un fabricante (Solo Administrador)
+    Eliminar un fabricante (Administrador o Gestor Biomédico)
     """
     try:
         db_fabricante = db.query(FabricanteModel).filter(
