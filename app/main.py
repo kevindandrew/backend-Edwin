@@ -47,6 +47,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Incluir routers
 # Auth debe ir primero para que /docs funcione correctamente
 app.include_router(auth_router)
