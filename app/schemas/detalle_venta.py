@@ -4,6 +4,7 @@ Schemas de Pydantic para validación de datos de DETALLE_VENTA
 from typing import Optional
 from pydantic import BaseModel
 from decimal import Decimal
+from datetime import date
 
 
 class DetalleVentaBase(BaseModel):
@@ -40,7 +41,7 @@ class DetalleVentaConRelaciones(DetalleVenta):
 # Schemas simplificados
 class VentaSimple(BaseModel):
     id_venta: int
-    fecha_venta: Optional[str] = None
+    fecha_venta: Optional[date] = None
     estado_venta: Optional[str] = None
 
     class Config:
