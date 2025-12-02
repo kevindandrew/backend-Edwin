@@ -8,7 +8,7 @@ from app.database import get_db
 from app.models.repuesto import Repuesto as RepuestoModel
 from app.models.tipo_tecnologia import TipoTecnologia as TecnologiaModel
 from app.schemas.repuesto import Repuesto, RepuestoCreate, RepuestoUpdate
-from app.auth import require_admin_or_tecnico, require_any_authenticated
+from app.auth import require_admin_tecnico_or_compras, require_any_authenticated
 
 router = APIRouter(
     prefix="/repuestos",
@@ -21,7 +21,7 @@ router = APIRouter(
 def crear_repuesto(
     repuesto: RepuestoCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin_or_tecnico)
+    current_user=Depends(require_admin_tecnico_or_compras)
 ):
     """
     Crear un nuevo repuesto en el inventario (Solo Administrador)

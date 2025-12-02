@@ -226,6 +226,34 @@ def require_admin_or_gestor(
     return checker(current_user, db)
 
 
+def require_admin_gestor_or_compras(
+    current_user: Usuario = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+) -> Usuario:
+    """Administrador, Gestor Biomédico o Responsable de Compras"""
+    checker = RoleChecker([
+        "Administrador", "ADMINISTRADOR",
+        "Gestor Biomédico", "GESTOR BIOMÉDICO",
+        "Gestor Biomedico",  # Forma exacta en BD (sin tilde)
+        "Responsable de Compras", "RESPONSABLE DE COMPRAS"
+    ])
+    return checker(current_user, db)
+
+
+def require_admin_tecnico_or_compras(
+    current_user: Usuario = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+) -> Usuario:
+    """Administrador, Técnico de Mantenimiento o Responsable de Compras"""
+    checker = RoleChecker([
+        "Administrador", "ADMINISTRADOR",
+        "Técnico de Mantenimiento", "TÉCNICO DE MANTENIMIENTO",
+        "Tecnico De Mantenimiento",  # Forma exacta en BD
+        "Responsable de Compras", "RESPONSABLE DE COMPRAS"
+    ])
+    return checker(current_user, db)
+
+
 def require_any_authenticated(
     current_user: Usuario = Depends(get_current_active_user)
 ) -> Usuario:

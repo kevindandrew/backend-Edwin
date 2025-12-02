@@ -13,7 +13,7 @@ from app.models.nivel_riesgo import NivelRiesgo as NivelRiesgoModel
 from app.models.tipo_tecnologia import TipoTecnologia as TecnologiaModel
 from app.models.usuario import Usuario as UsuarioModel
 from app.schemas.equipo_biomedico import EquipoBiomedico, EquipoBiomedicoCreate, EquipoBiomedicoUpdate, EquipoBiomedicoDetallado
-from app.auth import require_admin_or_gestor, require_any_authenticated
+from app.auth import require_admin_gestor_or_compras, require_any_authenticated
 
 router = APIRouter(
     prefix="/equipos-biomedicos",
@@ -26,7 +26,7 @@ router = APIRouter(
 def crear_equipo_biomedico(
     equipo: EquipoBiomedicoCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin_or_gestor)
+    current_user=Depends(require_admin_gestor_or_compras)
 ):
     """
     Crear un nuevo equipo biomédico (Solo Administrador)
