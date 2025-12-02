@@ -51,7 +51,7 @@ def obtener_repuestos(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin_or_tecnico)
+    current_user=Depends(require_admin_tecnico_or_compras)
 ):
     """
     Obtener lista de repuestos (Solo Administrador)
@@ -99,7 +99,7 @@ def actualizar_repuesto(
     repuesto_id: int,
     repuesto: RepuestoUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin_or_tecnico)
+    current_user=Depends(require_admin_tecnico_or_compras)
 ):
     """
     Actualizar un repuesto existente (Solo Administrador)
@@ -135,7 +135,7 @@ def actualizar_repuesto(
 def eliminar_repuesto(
     repuesto_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin_or_tecnico)
+    current_user=Depends(require_admin_tecnico_or_compras)
 ):
     """
     Eliminar un repuesto del inventario (Solo Administrador)
@@ -166,7 +166,7 @@ def eliminar_repuesto(
 @router.get("/stock/bajo", response_model=List[Repuesto])
 def obtener_repuestos_stock_bajo(
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin_or_tecnico)
+    current_user=Depends(require_admin_tecnico_or_compras)
 ):
     """
     Obtener repuestos con stock por debajo del stock mínimo (Solo Administrador)

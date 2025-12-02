@@ -95,7 +95,7 @@ def obtener_equipos_biomedicos(
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin_or_gestor)
+    current_user=Depends(require_admin_gestor_or_compras)
 ):
     """
     Obtener lista de equipos biomédicos (Solo Administrador)
@@ -213,7 +213,7 @@ def actualizar_equipo_biomedico(
     equipo_id: int,
     equipo: EquipoBiomedicoUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin_or_gestor)
+    current_user=Depends(require_admin_gestor_or_compras)
 ):
     """
     Actualizar un equipo biomédico existente (Solo Administrador)
@@ -268,7 +268,7 @@ def actualizar_equipo_biomedico(
 def eliminar_equipo_biomedico(
     equipo_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(require_admin_or_gestor)
+    current_user=Depends(require_admin_gestor_or_compras)
 ):
     """
     Eliminar un equipo biomédico (también eliminará sus datos técnicos en cascada) (Solo Administrador)
